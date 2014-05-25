@@ -1,0 +1,31 @@
+{
+    "name": "hubot-hotpepper",
+    "version": "0.1.0",
+    "author": {
+        "name": "Atsushi Nagase",
+        "email": "a@ngs.io",
+        "url": "http://ngs.io/"
+    },
+    "description": "Searches restaurants from Hotpepper with Hubot.",
+    "keywords": [
+        "hubot",
+        "hotpepper",
+        "restaurants",
+        "japan"
+    ],
+    "licenses": [
+        {
+            "type": "MIT"
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/ngs/hubot-hotpepper.git"
+    },
+    "bugs": {
+        "url": "https://github.com/ngs/hubot-hotpepper/issues"
+    },
+    "devDependencies": {
+        "hubot": ">=2.4.1"
+    }
+}
