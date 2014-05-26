@@ -18,6 +18,7 @@
             "type": "MIT"
         }
     ],
+    "main": "./src/index.coffee",
     "repository": {
         "type": "git",
         "url": "git://github.com/ngs/hubot-hotpepper.git"
