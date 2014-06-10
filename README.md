@@ -1,6 +1,9 @@
 hubot-hotpepper
 ===============
 
+[![Build Status][travis-badge]][travis]
+[![npm-version][npm-badge]][npm]
+
 Searches restaurants from Hotpepper with Hubot.
 
 [![](http://ja.ngs.io/images/2014-05-24-hubot-rws/screen.png)][blog]
@@ -56,3 +59,7 @@ License
 [blog]: http://ja.ngs.io/2014/05/24/hubot-rws/
 [Atsushi Nagase]: http://ngs.io/
 [MIT License]: LICENSE
+[travis-badge]: https://travis-ci.org/ngs/hubot-hotpepper.svg?branch=master
+[npm-badge]: http://img.shields.io/npm/v/hubot-hotpepper.svg
+[travis]: https://travis-ci.org/ngs/hubot-hotpepper
+[npm]: https://www.npmjs.org/package/hubot-hotpepper
