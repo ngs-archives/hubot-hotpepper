@@ -17,13 +17,21 @@ describe 'hubot-hotpepper', ->
     nock.disableNetConnect()
     robot = new Robot null, 'mock-adapter', no
     robot.adapter.on 'connected', ->
-      require('../src/scripts/hotpepper') robot
+      hubotScripts = path.resolve 'node_modules', 'hubot', 'src', 'scripts'
+      robot.loadFile path.resolve('.', 'src', 'scripts'), 'hotpepper.coffee'
+      robot.loadFile hubotScripts, 'help.coffee'
       user = robot.brain.userForId '1', {
         name: 'ngs'
         room: '#mocha'
       }
       adapter = robot.adapter
-      do done
+      waitForHelp = ->
+        if robot.helpCommands().length > 0
+          do done
+        else
+          setTimeout waitForHelp, 100
+      do waitForHelp
+
     do robot.run
 
   afterEach ->
@@ -31,8 +39,33 @@ describe 'hubot-hotpepper', ->
     robot.shutdown()
 
   describe 'listeners', ->
-    it 'should have 9', ->
-      expect(robot.listeners).to.have.length(9)
+    it 'should have 10', ->
+      expect(robot.listeners).to.have.length 10
+
+  describe 'help', ->
+    it 'should have 11', (done)->
+      expect(robot.helpCommands()).to.have.length 11
+      do done
+    it 'should parse help', (done)->
+      adapter.on 'send', (envelope, strings)->
+        try
+          expect(strings[0]).to.equal """
+          Hubot help - Displays all of the help commands that Hubot knows about.
+          Hubot help <query> - Displays all help commands that match <query>.
+          Hubot ご飯 <query> - ご飯検索
+          Hubot カラオケ <query> - カラオケができるお店検索
+          Hubot ランチ <query> - ランチ検索
+          Hubot ワイン <query> - ワインが充実してるお店検索
+          Hubot 夜食 <query> - 23 時以降に食事ができるお店検索
+          Hubot 焼酎 <query> - 焼酎が充実なお店検索
+          Hubot 酒 <query> - 日本酒が充実なお店検索
+          Hubot 食べ放題 <query> - 食べ放題のお店検索
+          Hubot 飲み放題 <query> - 飲み放題のお店検索
+          """
+          do done
+        catch e
+          done e
+      adapter.receive new TextMessage user, 'hubot help'
 
   describe 'error handling', ->
     beforeEach (done)->
