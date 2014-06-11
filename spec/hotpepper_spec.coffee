@@ -15,7 +15,7 @@ describe 'hubot-hotpepper', ->
   beforeEach (done)->
     process.env.HUBOT_RWS_API_KEY = 'fake-api-key'
     nock.disableNetConnect()
-    robot = new Robot null, 'mock-adapter', no
+    robot = new Robot null, 'mock-adapter', no, 'TestHubot'
     robot.adapter.on 'connected', ->
       hubotScripts = path.resolve 'node_modules', 'hubot', 'src', 'scripts'
       robot.loadFile path.resolve('.', 'src', 'scripts'), 'hotpepper.coffee'
@@ -48,24 +48,26 @@ describe 'hubot-hotpepper', ->
       do done
     it 'should parse help', (done)->
       adapter.on 'send', (envelope, strings)->
+        ## Prefix bug with parseHelp
+        ## https://github.com/github/hubot/pull/712
         try
           expect(strings[0]).to.equal """
-          Hubot help - Displays all of the help commands that Hubot knows about.
-          Hubot help <query> - Displays all help commands that match <query>.
-          Hubot ご飯 <query> - ご飯検索
-          Hubot カラオケ <query> - カラオケができるお店検索
-          Hubot ランチ <query> - ランチ検索
-          Hubot ワイン <query> - ワインが充実してるお店検索
-          Hubot 夜食 <query> - 23 時以降に食事ができるお店検索
-          Hubot 焼酎 <query> - 焼酎が充実なお店検索
-          Hubot 酒 <query> - 日本酒が充実なお店検索
-          Hubot 食べ放題 <query> - 食べ放題のお店検索
-          Hubot 飲み放題 <query> - 飲み放題のお店検索
+          TestTestHubot help - Displays all of the help commands that TestHubot knows about.
+          TestTestHubot help <query> - Displays all help commands that match <query>.
+          TestTestHubot ご飯 <query> - ご飯検索
+          TestTestHubot カラオケ <query> - カラオケができるお店検索
+          TestTestHubot ランチ <query> - ランチ検索
+          TestTestHubot ワイン <query> - ワインが充実してるお店検索
+          TestTestHubot 夜食 <query> - 23 時以降に食事ができるお店検索
+          TestTestHubot 焼酎 <query> - 焼酎が充実なお店検索
+          TestTestHubot 酒 <query> - 日本酒が充実なお店検索
+          TestTestHubot 食べ放題 <query> - 食べ放題のお店検索
+          TestTestHubot 飲み放題 <query> - 飲み放題のお店検索
           """
           do done
         catch e
           done e
-      adapter.receive new TextMessage user, 'hubot help'
+      adapter.receive new TextMessage user, 'TestHubot help'
 
   describe 'error handling', ->
     beforeEach (done)->
@@ -84,7 +86,7 @@ describe 'hubot-hotpepper', ->
           do done
         catch e
           done e
-      adapter.receive new TextMessage user, 'hubot gourmet me 西新宿'
+      adapter.receive new TextMessage user, 'TestHubot gourmet me 西新宿'
 
     it 'should handle not found', (done)->
       nockScope.reply 200, results: shop: []
@@ -94,7 +96,7 @@ describe 'hubot-hotpepper', ->
           do done
         catch e
           done e
-      adapter.receive new TextMessage user, 'hubot gourmet me 西新宿'
+      adapter.receive new TextMessage user, 'TestHubot gourmet me 西新宿'
 
     it 'should handle exception on request', (done)->
       nockScope.reply 200, -> throw new Error 'foo'
@@ -104,57 +106,57 @@ describe 'hubot-hotpepper', ->
           do done
         catch e
           done e
-      adapter.receive new TextMessage user, 'hubot gourmet me 西新宿'
+      adapter.receive new TextMessage user, 'TestHubot gourmet me 西新宿'
 
     it 'should handle json parse error', (done)->
       nockScope.reply 200, 'foo!'
       adapter.on 'send', (envelope, strings)->
         expect(strings[0]).to.equal 'SyntaxError: Unexpected token o'
         do done
-      adapter.receive new TextMessage user, 'hubot gourmet me 西新宿'
+      adapter.receive new TextMessage user, 'TestHubot gourmet me 西新宿'
 
   describe 'searching restaurants', ->
     [
-      ['hubot ご飯   me   西新宿'      , '']
-      ['hubot ご飯    西新宿'          , '']
-      ['hubot hotpepper   me  西新宿'  , '']
-      ['hubot hotpepper    西新宿'     , '']
-      ['hubot gourmet  me  西新宿'     , '']
-      ['hubot gourmet   西新宿'        , '']
-      ['hubot ランチ     西新宿'       , '&lunch=1']
-      ['hubot ランチ  me   西新宿'     , '&lunch=1']
-      ['hubot lunch     西新宿'        , '&lunch=1']
-      ['hubot lunch  me   西新宿'      , '&lunch=1']
-      ['hubot sake     西新宿'         , '&sake=1']
-      ['hubot sake  me   西新宿'       , '&sake=1']
-      ['hubot 酒     西新宿'           , '&sake=1']
-      ['hubot 酒  me   西新宿'         , '&sake=1']
-      ['hubot 日本酒     西新宿'       , '&sake=1']
-      ['hubot 日本酒  me   西新宿'     , '&sake=1']
-      ['hubot shochu     西新宿'       , '&shochu=1']
-      ['hubot shochu  me   西新宿'     , '&shochu=1']
-      ['hubot 焼酎     西新宿'         , '&shochu=1']
-      ['hubot 焼酎  me   西新宿'       , '&shochu=1']
-      ['hubot wine     西新宿'         , '&wine=1']
-      ['hubot wine  me   西新宿'       , '&wine=1']
-      ['hubot ワイン     西新宿'       , '&wine=1']
-      ['hubot ワイン  me   西新宿'     , '&wine=1']
-      ['hubot karaoke     西新宿'      , '&karaoke=1']
-      ['hubot karaoke  me   西新宿'    , '&karaoke=1']
-      ['hubot カラオケ     西新宿'     , '&karaoke=1']
-      ['hubot カラオケ  me   西新宿'   , '&karaoke=1']
-      ['hubot midnight meal  西新宿'   , '&midnight_meal=1']
-      ['hubot midnight meal me 西新宿' , '&midnight_meal=1']
-      ['hubot 夜食  西新宿'            , '&midnight_meal=1']
-      ['hubot 夜食 me 西新宿'          , '&midnight_meal=1']
-      ['hubot free  drink  西新宿'     , '&free_drink=1']
-      ['hubot free  drink me  西新宿'  , '&free_drink=1']
-      ['hubot 飲み放題  西新宿'        , '&free_drink=1']
-      ['hubot 飲み放題  me  西新宿'    , '&free_drink=1']
-      ['hubot free  food  西新宿'      , '&free_food=1']
-      ['hubot free  food me  西新宿'   , '&free_food=1']
-      ['hubot 食べ放題  西新宿'        , '&free_food=1']
-      ['hubot 食べ放題  me  西新宿'    , '&free_food=1']
+      ['TestHubot ご飯   me   西新宿'      , '']
+      ['TestHubot ご飯    西新宿'          , '']
+      ['TestHubot hotpepper   me  西新宿'  , '']
+      ['TestHubot hotpepper    西新宿'     , '']
+      ['TestHubot gourmet  me  西新宿'     , '']
+      ['TestHubot gourmet   西新宿'        , '']
+      ['TestHubot ランチ     西新宿'       , '&lunch=1']
+      ['TestHubot ランチ  me   西新宿'     , '&lunch=1']
+      ['TestHubot lunch     西新宿'        , '&lunch=1']
+      ['TestHubot lunch  me   西新宿'      , '&lunch=1']
+      ['TestHubot sake     西新宿'         , '&sake=1']
+      ['TestHubot sake  me   西新宿'       , '&sake=1']
+      ['TestHubot 酒     西新宿'           , '&sake=1']
+      ['TestHubot 酒  me   西新宿'         , '&sake=1']
+      ['TestHubot 日本酒     西新宿'       , '&sake=1']
+      ['TestHubot 日本酒  me   西新宿'     , '&sake=1']
+      ['TestHubot shochu     西新宿'       , '&shochu=1']
+      ['TestHubot shochu  me   西新宿'     , '&shochu=1']
+      ['TestHubot 焼酎     西新宿'         , '&shochu=1']
+      ['TestHubot 焼酎  me   西新宿'       , '&shochu=1']
+      ['TestHubot wine     西新宿'         , '&wine=1']
+      ['TestHubot wine  me   西新宿'       , '&wine=1']
+      ['TestHubot ワイン     西新宿'       , '&wine=1']
+      ['TestHubot ワイン  me   西新宿'     , '&wine=1']
+      ['TestHubot karaoke     西新宿'      , '&karaoke=1']
+      ['TestHubot karaoke  me   西新宿'    , '&karaoke=1']
+      ['TestHubot カラオケ     西新宿'     , '&karaoke=1']
+      ['TestHubot カラオケ  me   西新宿'   , '&karaoke=1']
+      ['TestHubot midnight meal  西新宿'   , '&midnight_meal=1']
+      ['TestHubot midnight meal me 西新宿' , '&midnight_meal=1']
+      ['TestHubot 夜食  西新宿'            , '&midnight_meal=1']
+      ['TestHubot 夜食 me 西新宿'          , '&midnight_meal=1']
+      ['TestHubot free  drink  西新宿'     , '&free_drink=1']
+      ['TestHubot free  drink me  西新宿'  , '&free_drink=1']
+      ['TestHubot 飲み放題  西新宿'        , '&free_drink=1']
+      ['TestHubot 飲み放題  me  西新宿'    , '&free_drink=1']
+      ['TestHubot free  food  西新宿'      , '&free_food=1']
+      ['TestHubot free  food me  西新宿'   , '&free_food=1']
+      ['TestHubot 食べ放題  西新宿'        , '&free_food=1']
+      ['TestHubot 食べ放題  me  西新宿'    , '&free_food=1']
     ].forEach ([msg, query], i)->
       it "responds to #{msg}", (done)->
         nock('http://webservice.recruit.co.jp')
